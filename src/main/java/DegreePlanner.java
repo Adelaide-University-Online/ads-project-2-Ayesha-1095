@@ -12,11 +12,13 @@
  * This is my own work as defined by
  * the University's Academic Integrity Policy.
  **/
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
 
 /**
  * Represents the degree prerequisite graph and generates
@@ -34,6 +36,12 @@ import java.io.FileNotFoundException;
  * which is well below the 25% threshold where a matrix becomes
  * more efficient. An adjacency list saves memory by only storing
  * edges that actually exist.</p>
+ *
+ * <p>Design decision: Unweighted graph chosen because all
+ * prerequisite relationships are equal - one course simply
+ * must come before another. There is no distance or cost
+ * associated with any edge. A weighted graph would add
+ * unnecessary complexity with no benefit for this problem.</p>
  *
  * <p>Algorithm: Breadth-first search (BFS-based) level-by-level traversal using in-degree
  * counting. Courses with in-degree zero have no prerequisites and
@@ -203,11 +211,108 @@ public class DegreePlanner {
         scanner.close();
         System.out.println("[INFO] Graph built successfully");
     }
+    // === Algorithm ===
+
+    /**
+     * Generates and prints an optimised study plan grouped into
+     * study periods using a BFS-based level-by-level traversal
+     * with in-degree counting.
+     *
+     * <p>Algorithm: Based on BFS from Koffman and Wolfgang (2016)
+     * pages 506-510. Courses with in-degree zero are identified
+     * first and placed in a Queue. Each study period takes up to
+     * maxCoursesPerPeriod courses from the Queue. Completing a
+     * course reduces the in-degree of courses it unlocks. When
+     * any course reaches in-degree zero it is added to the Queue
+     * for the next study period.</p>
+     *
+     * @param maxCoursesPerPeriod maximum courses per study period
+     */
+    public void generateStudyPlan(int maxCoursesPerPeriod) {
+        // validate input - must be at least 1 course per period
+        if (maxCoursesPerPeriod < 1) {
+            throw new IllegalArgumentException(
+                    "Must take at least 1 course per period");
+        }
+
+        // make working copy of inDegree so original graph is unchanged
+        // allows generateStudyPlan to be called multiple times safely
+        HashMap<String, Integer> remainingDegree =
+                new HashMap<>(inDegree);
+
+        // create Queue to store courses ready to be taken
+        // Queue chosen because BFS visits nodes level by level
+        // LinkedList implements Queue interface in Java
+        Queue<String> readyQueue = new LinkedList<>();
+
+        // === STEP 1 - add all courses with no prerequisites to Queue ===
+        // these courses can be taken immediately in any order
+        for (String code : remainingDegree.keySet()) {
+            if (remainingDegree.get(code) == 0) {
+                readyQueue.offer(code); // add to back of Queue
+            }
+        }
+
+        // track which study period we are currently filling
+        int periodNumber = 1;
+
+        // === STEP 2 - BFS level by level until all courses scheduled ===
+        while (!readyQueue.isEmpty()) {
+            // list to hold courses for this study period
+            ArrayList<String> currentPeriod = new ArrayList<>();
+
+            // take up to maxCoursesPerPeriod courses from Queue
+            // each course taken = one course in this study period
+            int coursesThisPeriod = 0;
+            while (!readyQueue.isEmpty() && coursesThisPeriod < maxCoursesPerPeriod) {
+                // remove first course from Queue - FIFO order
+                String course = readyQueue.poll();
+                currentPeriod.add(course);  // add to current period
+                coursesThisPeriod++;        // increment counter
+            }
+
+            // === STEP 3 - process completed courses ===
+            // for each course completed this period
+            // find what it unlocks and update inDegrees
+            for (String completedCourse : currentPeriod) {
+                // get list of courses this course unlocks
+                ArrayList<String> unlocked = adjacencyList.get(completedCourse);
+
+                // reduce inDegree of each unlocked course by 1
+                for (String unlockedCourse : unlocked) {
+                    int newDegree = remainingDegree.get(unlockedCourse) - 1;
+                    remainingDegree.put(unlockedCourse, newDegree);
+
+                    // if inDegree reaches 0 course is ready to take
+                    if (newDegree == 0) {
+                        readyQueue.offer(unlockedCourse); // add to Queue
+                    }
+                }
+            }
+
+            // === STEP 4 - print this study period ===
+            System.out.print("Study Period " + periodNumber + ": ");
+            for (int i = 0; i < currentPeriod.size(); i++) {
+                System.out.print(currentPeriod.get(i));
+                if (i < currentPeriod.size() - 1) {
+                    System.out.print(", "); // comma between courses
+                }
+            }
+            System.out.println(); // new line after each period
+
+            periodNumber++; // move to next study period
+        }
+
+        System.out.println("[INFO] Study plan complete - "
+                + (periodNumber - 1) + " study periods total");
+    }
 
 
     // === References ===
     //
     // Java HashMap - chosen for O(1) lookup by course code key.
+    // HashMap(Map m) copy constructor used to create working copy
+    // of inDegree so original graph remains unchanged.
     // Covered in Week 6 lecture material COMP2026 2026:
     // https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
     //
@@ -229,4 +334,11 @@ public class DegreePlanner {
     // Koffman, E. B. (2016). Data Structures: Abstraction and Design
     // using Java (3rd ed., Appendix A.10, pp. 596-601). John Wiley and Sons.
     // https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html
+    //
+    // Java Queue interface and LinkedList implementation -
+    // Queue chosen for BFS as confirmed by Koffman and Wolfgang
+    // (2016, p. 507): "To ensure identified vertices are visited
+    // in correct sequence, we store them in a queue":
+    // https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
+    // https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html
 }
