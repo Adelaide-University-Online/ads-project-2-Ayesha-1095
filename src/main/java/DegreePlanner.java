@@ -122,6 +122,60 @@ public class DegreePlanner {
         }
         return new ArrayList<>(); // return empty list if not found
     }
+
+    // === Standard Methods ===
+
+    /**
+     * Returns a string representation of this DegreePlanner
+     * showing the file name and number of courses loaded.
+     * @return formatted string summary
+     */
+    @Override
+    public String toString() {
+        // show number of courses and adjacency list size
+        return "DegreePlanner[courses=" + courses.size()
+                + ", edges=" + adjacencyList.size() + "]";
+    }
+
+    /**
+     * Checks equality based on courses and adjacency list.
+     * Two DegreePlanners are equal if they have the same
+     * graph structure.
+     * @param o the object to compare
+     * @return true if graph structures match
+     */
+    @Override
+    public boolean equals(Object o) {
+        // if comparing to itself always equal
+        if (this == o) {
+            return true;
+        }
+        // if null or different class not equal
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        // cast and compare graph structures
+        DegreePlanner other = (DegreePlanner) o;
+        return courses.equals(other.courses)
+                && adjacencyList.equals(other.adjacencyList)
+                && inDegree.equals(other.inDegree);
+    }
+
+    /**
+     * Returns hash code based on graph structure.
+     * Required by Java contract when equals() is overridden.
+     * @return hash code integer
+     */
+    @Override
+    public int hashCode() {
+        // prime multiplier reduces collisions in hash calculations
+        final int prime = 31;
+        int result = courses.hashCode();
+        result = prime * result + adjacencyList.hashCode();
+        result = prime * result + inDegree.hashCode();
+        return result;
+    }
+
     // === File Reading ===
 
     /**
@@ -341,4 +395,8 @@ public class DegreePlanner {
     // in correct sequence, we store them in a queue":
     // https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
     // https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html
+    //
+    // Java Object equals() and hashCode() contract - implemented
+    // to satisfy Java contract when equals() is overridden:
+    // https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#equals-java.lang.Object-
 }
