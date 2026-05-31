@@ -11,6 +11,7 @@
  * This is my own work as defined by
  *    the University's Academic Integrity Policy.
  **/
+import java.io.File;
 import java.util.Scanner;
 
 /**
@@ -22,7 +23,6 @@ import java.util.Scanner;
  * for console input. Input validation ensures sensible values
  * before passing to DegreePlanner.</p>
  */
-
 public class Runner {
 
     /**
@@ -35,12 +35,26 @@ public class Runner {
         System.out.println("=== Welcome to OptiTime Degree Planner ===");
         System.out.println();
 
-        // create scanner for user input
+        // create scanner for user input from console
         Scanner scanner = new Scanner(System.in);
 
         // === Step 1 - ask for degree file name ===
-        System.out.print("Enter degree file name (e.g. XBIT.txt): ");
-        String fileName = scanner.next(); // read file name
+        // keep asking until a valid file name is provided
+        String fileName = "";
+        while (true) {
+            System.out.print("Enter degree file name (e.g. XBIT.txt): ");
+            fileName = scanner.next(); // read file name
+
+            // check if file exists before proceeding
+            if (new File(fileName).exists()) {
+                break; // valid file found - exit loop
+            } else {
+                // file not found - ask again
+                System.out.println("[ERROR] File not found: "
+                        + fileName
+                        + " - please try again");
+            }
+        }
 
         // === Step 2 - ask for max courses per period ===
         System.out.print("Enter maximum courses per study period: ");
@@ -50,6 +64,7 @@ public class Runner {
         while (maxCourses < 1) {
             try {
                 maxCourses = scanner.nextInt(); // read number
+
                 // check number is at least 1
                 if (maxCourses < 1) {
                     System.out.println("[ERROR] Please enter a number greater than 0");
@@ -61,6 +76,12 @@ public class Runner {
                 System.out.print("Enter maximum courses per study period: ");
                 scanner.next(); // clear invalid input
             }
+        }
+
+        // warn if unusually high number entered
+        if (maxCourses > 10) {
+            System.out.println("[WARNING] " + maxCourses
+                    + " courses per period is unusually high.");
         }
 
         System.out.println();
@@ -94,6 +115,10 @@ public class Runner {
     //
     // Java Scanner.nextInt() - reads integer input from user:
     // https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html#nextInt--
+    //
+    // Java File.exists() - used to check if degree file exists
+    // before attempting to load it:
+    // https://docs.oracle.com/javase/8/docs/api/java/io/File.html#exists--
     //
     // Java try/catch - handles non-numeric Scanner input.
     // try-catch sequence described in Koffman and Wolfgang (2016)
