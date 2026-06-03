@@ -43,8 +43,9 @@ import java.util.Scanner;
  * associated with any edge. A weighted graph would add
  * unnecessary complexity with no benefit for this problem.</p>
  *
- * <p>Algorithm: Breadth-first search (BFS-based) level-by-level traversal using in-degree
- * counting. Courses with in-degree zero have no prerequisites and
+ * <p>Algorithm: Breadth-first search (BFS-based) level-by-level
+ * traversal using in-degree counting.
+ * Courses with in-degree zero have no prerequisites and
  * can be taken immediately. When a course is completed its adjacent
  * courses have their in-degree reduced by one. When any course
  * reaches in-degree zero it is unlocked and added to the next

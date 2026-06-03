@@ -30,12 +30,12 @@ public class Course {
     // === Constructor ===
 
     /**
-    * Construct a Course with the given course code.
-    * @param courseCode the unique code identifying this course
-    */
+     * Construct a Course with the given course code.
+     * @param courseCode the unique code identifying this course
+     */
     public Course(String courseCode) {
         // validate course code is not null or empty
-        if (courseCode == null || courseCode.isEmpty()) {
+        if (courseCode == null || courseCode.trim().isEmpty()) {
             throw new IllegalArgumentException("Course code cannot be null or empty");
         }
         this.courseCode = courseCode.trim(); // store trimmed code
@@ -44,9 +44,9 @@ public class Course {
     // === Getters ===
 
     /**
-    * Returns the course code for this course.
-    * @return the course code string
-    */
+     * Returns the course code for this course.
+     * @return the course code string
+     */
     public String getCourseCode() {
         return courseCode;  // return the course code
     }
@@ -54,9 +54,9 @@ public class Course {
     // === Standard Methods ===
 
     /**
-    * Returns a string representation of this course.
-    * @return the course code as the string representation
-    */
+     * Returns a string representation of this course.
+     * @return the course code as the string representation
+     */
     @Override
     public String toString() {
         return courseCode;  // course code is the natural display
