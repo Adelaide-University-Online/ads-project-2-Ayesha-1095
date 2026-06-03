@@ -1,8 +1,8 @@
 /**
  * File: DegreePlannerTest.java
  * Description: Unit tests for the DegreePlanner class covering
- *              constructor, file loading, graph building, in-degree
- *              counting and adjacency list construction.
+ *              constructor, file loading, graph building, BFS
+ *              algorithm, standard methods and exception handling.
  * Author: Ayesha Siddiqa
  * Student ID: a3006502
  * Email ID: a3006502@adelaide.edu.au
@@ -217,15 +217,216 @@ public class DegreePlannerTest {
         assertEquals(21, planner.getCourseCount()); // 21 courses
     }
 
+    // === Test 13: generateStudyPlan runs without crashing ===
+    /**
+     * Tests that generateStudyPlan completes normally
+     * with a standard maxCoursesPerPeriod value.
+     */
+    @Test
+    public void testGenerateStudyPlanDoesNotCrash() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // generateStudyPlan should run without throwing exception
+        planner.generateStudyPlan(2); // should complete normally
+    }
+
+    // === Test 14: generateStudyPlan works with 1 course per period ===
+    /**
+     * Tests that generateStudyPlan works correctly with
+     * only 1 course per study period - the slowest possible plan.
+     */
+    @Test
+    public void testGenerateStudyPlanWithOnePerPeriod() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // should work with 1 course per period
+        planner.generateStudyPlan(1); // should complete normally
+    }
+
+    // === Test 15: generateStudyPlan works with large max ===
+    /**
+     * Tests that generateStudyPlan works correctly when
+     * maxCoursesPerPeriod is larger than total course count.
+     */
+    @Test
+    public void testGenerateStudyPlanWithLargeMax() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // should work even if max is larger than total course count
+        planner.generateStudyPlan(100); // should complete normally
+    }
+
+    // === Test 16: generateStudyPlan works with XBDA file ===
+    /**
+     * Tests that generateStudyPlan works correctly with
+     * the XBDA degree file as well as XBIT.
+     */
+    @Test
+    public void testGenerateStudyPlanWithXBDA() {
+        // create planner from XBDA degree file
+        DegreePlanner planner = new DegreePlanner("XBDA.txt");
+
+        // should work with XBDA file as well as XBIT
+        planner.generateStudyPlan(2); // should complete normally
+    }
+
+    // === Test 17: toString contains expected information ===
+    /**
+     * Tests that toString returns the expected format
+     * showing course count and class name.
+     */
+    @Test
+    public void testToString() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // toString should contain course count and class name
+        assertTrue(planner.toString().contains("21")); // 21 courses
+        assertTrue(planner.toString().contains(
+                "DegreePlanner")); // class name present
+    }
+
+    // === Test 18: equals - same file produces equal planners ===
+    /**
+     * Tests that two DegreePlanners loaded from the same file
+     * are considered equal.
+     */
+    @Test
+    public void testEqualsTrue() {
+        // create two planners from same file
+        DegreePlanner planner1 = new DegreePlanner("XBIT.txt");
+        DegreePlanner planner2 = new DegreePlanner("XBIT.txt");
+
+        // same file should produce equal planners
+        assertTrue(planner1.equals(planner2)); // same structure
+    }
+
+    // === Test 19: equals - different files not equal ===
+    /**
+     * Tests that two DegreePlanners loaded from different files
+     * are not considered equal.
+     */
+    @Test
+    public void testEqualsFalse() {
+        // create planners from different files
+        DegreePlanner planner1 = new DegreePlanner("XBIT.txt");
+        DegreePlanner planner2 = new DegreePlanner("XBDA.txt");
+
+        // different files should produce different planners
+        assertFalse(planner1.equals(planner2)); // different structure
+    }
+
+    // === Test 20: equals - same reference ===
+    /**
+     * Tests the reflexive property of equals.
+     * A planner must always equal itself.
+     */
+    @Test
+    public void testEqualsSameReference() {
+        // create one planner
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // planner must equal itself - reflexive property
+        assertTrue(planner.equals(planner)); // same reference
+    }
+
+    // === Test 21: equals - null returns false ===
+    /**
+     * Tests that equals returns false when compared to null.
+     */
+    @Test
+    public void testEqualsNull() {
+        // create a planner
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // comparing to null should return false
+        assertFalse(planner.equals(null)); // null check
+    }
+
+    // === Test 22: hashCode - equal planners same hash ===
+    /**
+     * Tests that two equal planners produce the same hashCode.
+     * Required by Java equals/hashCode contract.
+     */
+    @Test
+    public void testHashCodeEqualPlanners() {
+        // create two identical planners
+        DegreePlanner planner1 = new DegreePlanner("XBIT.txt");
+        DegreePlanner planner2 = new DegreePlanner("XBIT.txt");
+
+        // equal planners must have same hashCode
+        assertEquals(planner1.hashCode(),
+                planner2.hashCode()); // same hash
+    }
+
+    // === Test 23: Exception - zero courses per period ===
+    /**
+     * Tests that generateStudyPlan throws IllegalArgumentException
+     * when maxCoursesPerPeriod is zero.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testZeroCoursesPerPeriodThrowsException() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // zero courses per period should throw exception
+        planner.generateStudyPlan(0); // should throw
+    }
+
+    // === Test 24: Exception - negative courses per period ===
+    /**
+     * Tests that generateStudyPlan throws IllegalArgumentException
+     * when maxCoursesPerPeriod is negative.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNegativeCoursesPerPeriodThrowsException() {
+        // create planner from XBIT degree file
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+
+        // negative courses per period should throw exception
+        planner.generateStudyPlan(-1); // should throw
+    }
+
+    // === Test 25: equals - different type returns false ===
+    /**
+     * Tests that equals returns false when compared to
+     * a non-DegreePlanner object.
+     */
+    @Test
+    public void testEqualsDifferentType() {
+        // create a planner
+        DegreePlanner planner = new DegreePlanner("XBIT.txt");
+        String notAPlanner = "XBIT.txt";
+
+        // comparing to different type should return false
+        assertFalse(planner.equals(notAPlanner)); // different type
+    }
+
     // === References ===
     //
-    // JUnit 4 @Test annotation and assertion methods:
+    // JUnit 4 @Test annotation and assertion methods including
+    // assertEquals, assertTrue and assertFalse:
     // https://junit.org/junit4/javadoc/latest/org/junit/Assert.html
     //
-    // JUnit 4 assertTrue - used to verify adjacency list contents:
+    // JUnit 4 assertTrue - used to verify adjacency list contents
+    // and toString format in Tests 7, 8, 9, 11, 17, 18, 20:
     // https://junit.org/junit4/javadoc/latest/org/junit/Assert.html#assertTrue(boolean)
+    //
+    // JUnit 4 assertFalse - used to verify equals returns false
+    // for null, different type and different file in Tests 19, 21, 25:
+    // https://junit.org/junit4/javadoc/latest/org/junit/Assert.html#assertFalse(boolean)
+    //
+    // JUnit 4 expected exception testing using @Test(expected = ...):
+    // https://github.com/junit-team/junit4/wiki/Exception-testing
     //
     // Java ArrayList.contains() - used to verify adjacency list
     // contains expected course codes in Tests 7 and 8:
     // https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html#contains-java.lang.Object-
+    //
+    // Java equals() and hashCode() contract - equal objects must
+    // have equal hash codes, tested in Test 22:
+    // https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#hashCode--
 }
