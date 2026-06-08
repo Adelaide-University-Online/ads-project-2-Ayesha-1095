@@ -30,12 +30,13 @@ import java.util.Scanner;
  * imply both courses depend on each other.</p>
  *
  * <p>Design decision: Adjacency list chosen over adjacency matrix
- * because the degree graph is sparse. XBIT has 21 courses giving
- * a maximum of 420 directed edges, but only around 25 actual
- * prerequisite relationships exist. Density is approximately 6%
- * which is well below the 25% threshold where a matrix becomes
- * more efficient. An adjacency list saves memory by only storing
- * edges that actually exist.</p>
+ * because the degree graph is sparse. Both XBIT and XBDA degrees
+ * have a density of approximately 4% which is well below the
+ * 25% break-even point identified in Koffman and Wolfgang (2016,
+ * p.504). XBIT has 21 courses giving V squared of 441 with only
+ * 18 actual edges. XBDA has 23 courses giving V squared of 529
+ * with only 23 actual edges. An adjacency list saves memory by
+ * only storing edges that actually exist.</p>
  *
  * <p>Design decision: Unweighted graph chosen because all
  * prerequisite relationships are equal - one course simply
